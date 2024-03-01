@@ -1,19 +1,22 @@
 #include <Arduino.h>
 #include "PeerClass.h"
 
-// put function declarations here:
-int myFunction(int, int);
+PeerClass Peer;
+PeriphClass Periph;
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(115000);
+
+  Serial.println("Setup");
+
+  Peer.SetName("PeerName1");
+  Periph.SetName("PeripchName1");
+  
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  while(1) {
+
+  }
 }
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
-}
