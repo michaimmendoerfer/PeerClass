@@ -1,21 +1,18 @@
 #include <Arduino.h>
-#include "MyClass.h"
+#include "PeerClass.h"
+
+int  PeriphClass::_PeriphClassId = 0;
+int  PeerClass::_PeerClassId = 0;
 
 PeriphClass::PeriphClass()
 {
-    Serial.println("PeriphClass-Constructor");
-    Serial.print("_Id = "); Serial.println(_ClassId);
-    _id = _ClassId;
-    _ClassId++;
+    _Id = _PeriphClassId;
+    _PeriphClassId++;
 }
 
 //PeriphClass::PeriphClass(char* Name, int Id, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, float Value, float OldValue, bool Changed, int PeerId)
-PeriphClass::PeriphClass(char* Name)
+bool PeriphClass::SetName(char* Name)
 {
-    strcpy(_Name, Name);
-}
-
-bool  PeriphClass::SetName(char *Name) {
     strcpy(_Name, Name);
     return true;
 }
@@ -31,10 +28,8 @@ int PeriphClass::GetId()
 
 PeerClass::PeerClass()
 {
-    Serial.println("PeerClass-Constructor");
-    Serial.print("_Id = "); Serial.println(_ClassId);
-    _id = _ClassId;
-    _ClassId++;
+    _Id = _PeerClassId;
+    _PeerClassId++;
 }
 
 bool PeerClass::SetName(char *Name)
@@ -46,6 +41,17 @@ bool PeerClass::SetName(char *Name)
 char *PeerClass::GetName()
 {
     return (_Name);
+}
+
+char *PeerClass::GetPeriphName(int P)
+{
+    return Periph[P].GetName();
+}
+
+bool  PeerClass::SetPeriphName(int P, char *Name)
+{
+    Periph[P].SetName(Name);
+    return true;
 }
 
 int PeerClass::GetId()

@@ -4,10 +4,9 @@
 #include <Arduino.h>
 
 class PeriphClass {
-  
-    private:
-        static int  _ClassId;
+    static int  _PeriphClassId;
 
+    private:
         char        _Name[20];
         int         _Id;
         int         _Type;      //1=Switch, 2=Amp, 3=Volt
@@ -32,9 +31,9 @@ class PeriphClass {
 
 class PeerClass 
 {
-    private:
-        static int _ClassId;
+    static int _PeerClassId;
 
+    private:
         char       _Name[20];
         int        _Id;
         int        _PNumber;
@@ -45,13 +44,16 @@ class PeerClass
         bool       _DebugMode;
         bool       _DemoMode;
         bool       _ReadyToPair;
-        PeriphClass *Periph[MAX_PERIPHERALS]; 
+        PeriphClass Periph[4]; 
     
     public:
         PeerClass();
 
         bool  SetName(char *Name);
+        
         char *GetName();
+        char *GetPeriphName(int P);
+        bool  SetPeriphName(int P, char *Name);
         int   GetId();
 };
 
