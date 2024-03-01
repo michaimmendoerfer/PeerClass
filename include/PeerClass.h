@@ -23,6 +23,8 @@ class PeriphClass {
     public:
         PeriphClass();
         //PeriphClass(char* Name, int Id, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, float Value, float OldValue, bool Changed, int PeerId);
+        PeriphClass(char* Name);
+        
 
         bool  SetName(char *Name);
         char *GetName();

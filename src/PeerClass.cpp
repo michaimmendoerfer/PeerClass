@@ -53,18 +53,13 @@ uint32_t   PeerClass::GetTSLastSeen() { return _TSLastSeen; }
 void       PeerClass::SetTSLastSeen(uint32_t TSLastSeen) { _TSLastSeen = TSLastSeen; }
 bool  PeerClass::GetSleepMode() { return _SleepMode; }
 void  PeerClass::SetSleepMode(bool SleepMode) { _SleepMode = SleepMode; }
-bool  PeerClass::GetDebugMode() { return _SleepMode; }
+bool  PeerClass::GetDebugMode() { return _DebugMode; }
 void  PeerClass::SetDebugMode(bool DebugMode) { _DebugMode = DebugMode; }
-bool  PeerClass::GetDemoMode() { return _SleepMode; }
-void  PeerClass::SetSleepMode(bool SleepMode) { _SleepMode = SleepMode; }
+bool  PeerClass::GetDemoMode() { return _DemoMode; }
+void  PeerClass::SetDemoMode(bool DemoMode) { _DemoMode = DemoMode; }
+bool  PeerClass::GetPairMode() { return _PairMode; }
+void  PeerClass::SetPairMode(bool PairMode) { _PairMode = PairMode; }
 
-        uint32_t   _TSLastSeen;
-        int        _Type;  // 
-        bool       _SleepMode;
-        bool       _DebugMode;
-        bool       _DemoMode;
-        bool       _ReadyToPair;
-        PeriphClass Periph[4]; 
 char *PeerClass::GetPeriphName(int P) { return Periph[P].GetName(); }
 bool  PeerClass::SetPeriphName(int P, char *Name) { Periph[P].SetName(Name); return true; }
 int   PeerClass::GetId() { return _Id; }
