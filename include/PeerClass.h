@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 class PeriphClass {
-    static int  _PeriphClassId;
+    static int  _ClassId;
 
     private:
         char        _Name[20];
@@ -31,7 +31,7 @@ class PeriphClass {
 
 class PeerClass 
 {
-    static int _PeerClassId;
+    static int _ClassId;
 
     private:
         char       _Name[20];
