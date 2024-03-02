@@ -45,6 +45,7 @@ bool  PeriphClass::GetChanged() { return _Changed; }
 void  PeriphClass::SetChanged(bool Changed) { _Changed = Changed; }
 
 
+
 PeerClass::PeerClass()
 {
     _Id = _ClassId;
@@ -85,6 +86,54 @@ char *PeerClass::GetPeriphName(int P) { return Periph[P].GetName(); }
 bool  PeerClass::SetPeriphName(int P, char *Name) { Periph[P].SetName(Name); return true; }
 void  PeerClass::SetupPeriph(int P, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
 {
-    PeerClass::Periph[P].Setup(Name, Type, isADS, IOPort, Nullwert, VperAmp, Vin, PeerId);
+    Periph[P].Setup(Name, Type, isADS, IOPort, Nullwert, VperAmp, Vin, PeerId);
 }
-        
+
+int   PeerClass::GetPeriphId(char *Name)
+{
+    for (int P=0; P<MAX_PERIPHERALS; P++)
+    {   
+        if (strcmp(Name, Periph[P].GetName()) == 0) return Periph[P].GetId();
+    }
+    return -1;
+}
+void  PeerClass::SetPeriphValue(int P, float Value)
+{
+    Periph[P].SetValue(Value);
+}
+void  PeerClass::SetPeriphValue(char *Name, float Value)
+{
+   for (int P=0; P<MAX_PERIPHERALS; P++)
+    {   
+        if (strcmp(Name, Periph[P].GetName()) == 0) Periph[P].SetValue(Value); 
+    }    
+}
+float PeerClass::GetPeriphValue(int P) { return Periph[P].GetValue(); }
+float PeerClass::GetPeriphValue(char *Name)
+{
+   for (int P=0; P<MAX_PERIPHERALS; P++)
+    {   
+        if (strcmp(Name, Periph[P].GetName()) == 0) return Periph[P].GetValue(); 
+    }    
+
+    return -1;
+}
+
+float PeerClass::GetPeriphNullwert(int P) { return Periph[P].GetNullwert(); }
+float PeerClass::GetPeriphNullwert(char *Name) 
+{
+    for (int P=0; P<MAX_PERIPHERALS; P++)
+    {   
+        if (strcmp(Name, Periph[P].GetName()) == 0) return Periph[P].GetNullwert(); 
+    }    
+
+    return -1;
+}
+void  PeerClass::SetPeriphNullwert(int P, float Nullwert) { Periph[P].SetNullwert(Nullwert); }
+void  PeerClass::SetPeriphNullwert(char *Name, float Nullwert)
+{
+    for (int P=0; P<MAX_PERIPHERALS; P++)
+    {   
+        if (strcmp(Name, Periph[P].GetName()) == 0) Periph[P].SetNullwert(Nullwert);
+    }    
+}

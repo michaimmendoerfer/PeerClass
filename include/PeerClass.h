@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+#define MAX_PERIPHERALS   4
 class PeriphClass {
     static int  _ClassId;
 
@@ -47,7 +48,7 @@ class PeriphClass {
         void  SetOldValue(float OldValue);
         bool  hasChanged();
         bool  GetChanged();
-        void  SetChanged(bool Changed);        
+        void  SetChanged(bool Changed);     
 };
 
 class PeerClass 
@@ -63,7 +64,7 @@ class PeerClass
         bool       _DebugMode;
         bool       _DemoMode;
         bool       _PairMode;
-        PeriphClass Periph[4]; 
+        PeriphClass Periph[MAX_PERIPHERALS]; 
         uint32_t   _TSLastSeen;
         
     
@@ -89,9 +90,41 @@ class PeerClass
         void  SetDemoMode(bool DemoMode);
         bool  GetPairMode();
         void  SetPairMode(bool PairMode);
+        
+        PeriphClass *GetPeriph(int P);
+        PeriphClass *GetPeriph(char *Name);
+        
+        
         void  SetupPeriph(int P, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId);
         char *GetPeriphName(int P);
         bool  SetPeriphName(int P, char *Name);
+        
+        float GetPeriphValue(int P);
+        float GetPeriphValue(char *Name);
+        void  SetPeriphValue(int P, float Value);
+        void  SetPeriphValue(char *Name, float Value);
+        float GetPeriphOldValue(int P);
+        
+        bool  PeriphChanged(int P);
+        
+        bool  PeriphHasADS(int P);
+        bool  GetPeriphADS(int P);
+        
+        int   GetPeriphType(int P);
+        
+        int   GetPeriphVin(int P);
+        void  SetPeriphVin(int P, float Vin);
+        
+        float GetPeriphVperAmp(int P);
+        void  SetPeriphVperAmp(int P, float VperAmp);
+        
+        int   GetPeriphIOPort(int P);
+        float GetPeriphNullwert(int P);
+        float GetPeriphNullwert(char *Name);
+        void  SetPeriphNullwert(int P, float Nullwert);
+        void  SetPeriphNullwert(char *Name, float Nullwert);
+
+        int   GetPeriphId(char *Name);        
 };
 
 #endif
