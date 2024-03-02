@@ -1,15 +1,24 @@
 #include <Arduino.h>
 #include "PeerClass.h"
 
-int  PeriphClass::_PeriphClassId = 0;
-int  PeerClass::_PeerClassId = 0;
+int  PeriphClass::_ClassId = 0;
+int  PeerClass::_ClassId = 0;
 
 PeriphClass::PeriphClass()
 {
-    _Id = _PeriphClassId;
-    _PeriphClassId++;
+    _Id = _ClassId;
+    _ClassId++;
 }
-//PeriphClass::PeriphClass(char* Name, int Id, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, float Value, float OldValue, bool Changed, int PeerId)
+void  PeriphClass::Setup(char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
+{
+    strcpy(_Name, Name);
+    _Type = Type;
+    _isADS = isADS;
+    _IOPort = IOPort;
+    _Nullwert = Nullwert;
+    _VperAmp = VperAmp;
+    _PeerId = PeerId;
+}
 bool  PeriphClass::SetName(char* Name) { strcpy(_Name, Name); return true; }
 char *PeriphClass::GetName(){ return (_Name); }
 int   PeriphClass::GetId() { return _Id; }
@@ -20,7 +29,7 @@ bool  PeriphClass::isADS() { return _isADS; }
 bool  PeriphClass::GetADS() { return _isADS; }
 void  PeriphClass::SetADS(bool isADS) { _isADS = isADS; }
 int   PeriphClass::GetIOPort() { return _IOPort; }
-void  PeriphClass::SetIOPort(int Port) { _IOPort = IOPort; }
+void  PeriphClass::SetIOPort(int IOPort) { _IOPort = IOPort; }
 float PeriphClass::GetNullwert() { return _Nullwert; }
 void  PeriphClass::SetNullwert(float Nullwert) { _Nullwert = Nullwert; }
 float PeriphClass::GetVperAmp() { return _VperAmp; }
@@ -41,16 +50,29 @@ PeerClass::PeerClass()
     _Id = _ClassId;
     _ClassId++;
 }
+void  PeerClass::Setup(char* Name, int Type, uint8_t *BroadcastAddress, bool SleepMode, bool DebugMode, bool DemoMode, bool PairMode)
+{
+    strcpy(_Name, Name);
+    _Type = Type;
+    for (int b=0; b<6; b++)_BroadcastAddress[b] = BroadcastAddress[b];
+    _SleepMode = SleepMode;
+    _DebugMode = DebugMode;
+    _DemoMode  = DemoMode;
+    _PairMode  = PairMode;
+}      
 bool  PeerClass::SetName(char *Name) { strcpy(_Name, Name); return true; }
 char *PeerClass::GetName() { return (_Name); }
 int   PeerClass::GetId() { return _Id; }
 void  PeerClass::SetId(int Id) { _Id = Id; }
 int   PeerClass::GetType() { return _Type; }
 void  PeerClass::SetType(int Type) { _Type = Type; }
-uint8_t[6] PeerClass::GetBroadcastAddress() { return _BroadcastAddress; }
-void       PeerClass::SetBroadcastAddress(int8_t[6] BroadcastAdress) { _BroadcastAddress = BroadcastAdress }
-uint32_t   PeerClass::GetTSLastSeen() { return _TSLastSeen; }
-void       PeerClass::SetTSLastSeen(uint32_t TSLastSeen) { _TSLastSeen = TSLastSeen; }
+uint8_t *PeerClass::GetBroadcastAddress() { return _BroadcastAddress; }
+void     PeerClass::SetBroadcastAddress(int8_t *BroadcastAddress) 
+{ 
+    for (int b=0; b<6; b++)_BroadcastAddress[b] = BroadcastAddress[b];
+}
+uint32_t PeerClass::GetTSLastSeen() { return _TSLastSeen; }
+void     PeerClass::SetTSLastSeen(uint32_t TSLastSeen) { _TSLastSeen = TSLastSeen; }
 bool  PeerClass::GetSleepMode() { return _SleepMode; }
 void  PeerClass::SetSleepMode(bool SleepMode) { _SleepMode = SleepMode; }
 bool  PeerClass::GetDebugMode() { return _DebugMode; }
@@ -59,7 +81,10 @@ bool  PeerClass::GetDemoMode() { return _DemoMode; }
 void  PeerClass::SetDemoMode(bool DemoMode) { _DemoMode = DemoMode; }
 bool  PeerClass::GetPairMode() { return _PairMode; }
 void  PeerClass::SetPairMode(bool PairMode) { _PairMode = PairMode; }
-
 char *PeerClass::GetPeriphName(int P) { return Periph[P].GetName(); }
 bool  PeerClass::SetPeriphName(int P, char *Name) { Periph[P].SetName(Name); return true; }
-int   PeerClass::GetId() { return _Id; }
+void  PeerClass::SetupPeriph(int P, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
+{
+    PeerClass::Periph[P].Setup(Name, Type, isADS, IOPort, Nullwert, VperAmp, Vin, PeerId);
+}
+        
