@@ -1,16 +1,11 @@
 #include <Arduino.h>
 #include "PeerClass.h"
 #include <LinkedList.h>
+#include "Jeepify.h"
 
-LinkedList<PeerClass*> PeerList = LinkedList<PeerClass*>();
+LinkedList<PeerClass*>   PeerList =   LinkedList<PeerClass*>();
+LinkedList<PeriphClass*> PeriphList = LinkedList<PeriphClass*>();
 
-
-void PrintMAC(const uint8_t * mac_addr){
-  char macStr[18];
-  snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-  Serial.print(macStr);
-}
 void setup() {
   Serial.begin(115200);
 
@@ -38,23 +33,22 @@ void setup() {
 
 	for(int i = 0; i < PeerList.size(); i++){
 
-		// Get animal from list
 		Peer = PeerList.get(i);
 
-		// If its a mammal, then print it's name
 		if(Peer->GetType() == 11){
 
-			// Avoid printing spacer on the first element
-			
 			Serial.print(Peer->GetName());
       Serial.println(" is Type:11");
 		}
     sprintf(Buf, "List: %d - Peer-Id %d - Periph-Id - %d", i, Peer->GetId(), Peer->GetPeriphId(0));
-    Peer->SetupPeriph(0, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    Peer->PeriphSetup(0, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    PeriphList.add(Peer->GetPeriphPtr(0));
     sprintf(Buf, "List: %d - Peer-Id %d - Periph-Id - %d", i, Peer->GetId(), Peer->GetPeriphId(1));
-    Peer->SetupPeriph(1, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    Peer->PeriphSetup(1, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    PeriphList.add(Peer->GetPeriphPtr(1));
     sprintf(Buf, "List: %d - Peer-Id %d - Periph-Id - %d", i, Peer->GetId(), Peer->GetPeriphId(2));
-    Peer->SetupPeriph(2, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    Peer->PeriphSetup(2, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    PeriphList.add(Peer->GetPeriphPtr(2));
     }
 
   for(int i = 0; i < PeerList.size(); i++){
@@ -73,3 +67,9 @@ void loop() {
   }
 }
 
+void PrintMAC(const uint8_t * mac_addr){
+  char macStr[18];
+  snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
+           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
+  Serial.print(macStr);
+}

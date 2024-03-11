@@ -1,93 +1,97 @@
 #include <Arduino.h>
 #include "PeerClass.h"
+#include "main.h"
+
+PeerClass   *ActivePeer, *ActivePDC, *ActiveBat, *ActiveSelection;
+PeriphClass *ActiveSens, *ActiveSwitch, *ActivePeriph;
 
 int  PeriphClass::_ClassId = 0;
 int  PeerClass::_ClassId = 0;
 
+char ExportImportBuffer[50+40*MAX_PERIPHERALS];
+
+#pragma region PeriphClass::Declaration
 PeriphClass::PeriphClass()
 {
     _Id = _ClassId;
     _ClassId++;
 }
-void  PeriphClass::Setup(int P, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
+void  PeriphClass::Setup(char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
 {
     strcpy(_Name, Name);
     _Type = Type;
-    _Pos = P;
     _isADS = isADS;
     _IOPort = IOPort;
     _Nullwert = Nullwert;
     _VperAmp = VperAmp;
     _PeerId = PeerId;
 }
-bool  PeriphClass::SetName(char* Name) { strcpy(_Name, Name); return true; }
-char *PeriphClass::GetName(){ return (_Name); }
-int   PeriphClass::GetId() { return _Id; }
-void  PeriphClass::SetId(int Id) { _Id = Id; }
-int   PeriphClass::GetType() { return _Type; }
-void  PeriphClass::SetType(int Type) { _Type = Type; }
-bool  PeriphClass::isADS() { return _isADS; }
-bool  PeriphClass::GetADS() { return _isADS; }
-void  PeriphClass::SetADS(bool isADS) { _isADS = isADS; }
-int   PeriphClass::GetIOPort() { return _IOPort; }
-void  PeriphClass::SetIOPort(int IOPort) { _IOPort = IOPort; }
-float PeriphClass::GetNullwert() { return _Nullwert; }
-void  PeriphClass::SetNullwert(float Nullwert) { _Nullwert = Nullwert; }
-float PeriphClass::GetVperAmp() { return _VperAmp; }
-void  PeriphClass::SetVperAmp(float VperAmp) { _VperAmp = VperAmp; }
-int   PeriphClass::GetVin() { return _Vin; }
-void  PeriphClass::SetVin(int Vin) { _Vin = Vin; }
-float PeriphClass::GetValue() { return _Value; }
-void  PeriphClass::SetValue(float Value) { _Value = Value; }
-float PeriphClass::GetOldValue() { return _OldValue; }
-void  PeriphClass::SetOldValue(float OldValue) { _OldValue = OldValue; }
-bool  PeriphClass::hasChanged() { return _Changed; }
-bool  PeriphClass::GetChanged() { return _Changed; }
-void  PeriphClass::SetChanged(bool Changed) { _Changed = Changed; }
-
+#pragma endregion PeriphClass::Declaration
+#pragma region PeerClass::Declaration
 PeerClass::PeerClass()
 {
     _Id = _ClassId;
     _ClassId++;
 }
-void  PeerClass::Setup(char* Name, int Type, uint8_t *BroadcastAddress, bool SleepMode, bool DebugMode, bool DemoMode, bool PairMode)
+void  PeerClass::Setup(char* Name, int Type, const uint8_t *BroadcastAddress, bool SleepMode, bool DebugMode, bool DemoMode, bool PairMode)
 {
     strcpy(_Name, Name);
     _Type = Type;
-    for (int b=0; b<6; b++)_BroadcastAddress[b] = BroadcastAddress[b];
+    memcpy(_BroadcastAddress, BroadcastAddress, 6);
     _SleepMode = SleepMode;
     _DebugMode = DebugMode;
     _DemoMode  = DemoMode;
     _PairMode  = PairMode;
+    
+    for (int Si=0; Si<MAX_PERIPHERALS; Si++) Periph[Si].SetPos(Si);
 }      
-bool  PeerClass::SetName(char *Name) { strcpy(_Name, Name); return true; }
-char *PeerClass::GetName() { return (_Name); }
-int   PeerClass::GetId() { return _Id; }
-void  PeerClass::SetId(int Id) { _Id = Id; }
-int   PeerClass::GetType() { return _Type; }
-void  PeerClass::SetType(int Type) { _Type = Type; }
-uint8_t *PeerClass::GetBroadcastAddress() { return _BroadcastAddress; }
-void     PeerClass::SetBroadcastAddress(int8_t *BroadcastAddress) 
-{ 
-    memcpy(_BroadcastAddress, BroadcastAddress, 6);
-}
-uint32_t PeerClass::GetTSLastSeen() { return _TSLastSeen; }
-void     PeerClass::SetTSLastSeen(uint32_t TSLastSeen) { _TSLastSeen = TSLastSeen; }
-bool  PeerClass::GetSleepMode() { return _SleepMode; }
-void  PeerClass::SetSleepMode(bool SleepMode) { _SleepMode = SleepMode; }
-bool  PeerClass::GetDebugMode() { return _DebugMode; }
-void  PeerClass::SetDebugMode(bool DebugMode) { _DebugMode = DebugMode; }
-bool  PeerClass::GetDemoMode() { return _DemoMode; }
-void  PeerClass::SetDemoMode(bool DemoMode) { _DemoMode = DemoMode; }
-bool  PeerClass::GetPairMode() { return _PairMode; }
-void  PeerClass::SetPairMode(bool PairMode) { _PairMode = PairMode; }
-char *PeerClass::GetPeriphName(int P) { return Periph[P].GetName(); }
-bool  PeerClass::SetPeriphName(int P, char *Name) { Periph[P].SetName(Name); return true; }
-void  PeerClass::SetupPeriph(int P, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
+char* PeerClass::Export() 
 {
-    Periph[P].Setup(P, Name, Type, isADS, IOPort, Nullwert, VperAmp, Vin, PeerId);
-}
+    char ReturnBufferPeriph[40];
 
+    snprintf(ExportImportBuffer, sizeof(ExportImportBuffer), "%s;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d", 
+                        _Name, _Type, 
+                        _BroadcastAddress[0], _BroadcastAddress[1], _BroadcastAddress[2],
+                        _BroadcastAddress[3], _BroadcastAddress[4], _BroadcastAddress[5],
+                        _SleepMode, _DebugMode, _DemoMode);
+                        
+    for (int Si=0; Si<MAX_PERIPHERALS; Si++)
+    {
+        snprintf(ReturnBufferPeriph, sizeof(ReturnBufferPeriph), ";%s;%d;%d;%d",
+                        Periph[Si].GetName(), Periph[Si].GetType(), Periph[Si].GetPos(), Periph[Si].GetPeerId());
+
+        strcat(ExportImportBuffer, ReturnBufferPeriph);
+    }
+
+    return ExportImportBuffer;
+}
+void PeerClass::Import(char *Buf) 
+{
+    strcpy(_Name, strtok(Buf, ";"));
+    _Type = atoi(strtok(NULL, ",;+"));
+    _BroadcastAddress[0] = atoi(strtok(NULL, ";"));
+    _BroadcastAddress[1] = atoi(strtok(NULL, ";"));
+    _BroadcastAddress[2] = atoi(strtok(NULL, ";"));
+    _BroadcastAddress[3] = atoi(strtok(NULL, ";"));
+    _BroadcastAddress[4] = atoi(strtok(NULL, ";"));
+    _BroadcastAddress[5] = atoi(strtok(NULL, ";+"));
+    _SleepMode = atoi(strtok(NULL, ";"));
+    _DebugMode = atoi(strtok(NULL, ";"));
+    _DemoMode  = atoi(strtok(NULL, ";"));
+
+    for (int Si=0; Si<MAX_PERIPHERALS; Si++)
+    {
+        Periph[Si].SetName(strtok(NULL, ";"));
+        Periph[Si].SetType(atoi(strtok(NULL, ";")));
+        Periph[Si].SetPos(atoi(strtok(NULL, ";")));
+        Periph[Si].SetPeerId(atoi(strtok(NULL, ";")));
+    }
+}
+        
+void  PeerClass::PeriphSetup(int Pos, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
+{
+    Periph[Pos].Setup(Name, Type, isADS, IOPort, Nullwert, VperAmp, Vin, PeerId);
+}
 int   PeerClass::GetPeriphId(char *Name)
 {
     for (int P=0; P<MAX_PERIPHERALS; P++)
@@ -96,14 +100,6 @@ int   PeerClass::GetPeriphId(char *Name)
     }
     return -1;
 }
-int   PeerClass::GetPeriphId(int Pos)
-{
-    return Periph[Pos].GetId();
-}
-void  PeerClass::SetPeriphValue(int P, float Value)
-{
-    Periph[P].SetValue(Value);
-}
 void  PeerClass::SetPeriphValue(char *Name, float Value)
 {
    for (int P=0; P<MAX_PERIPHERALS; P++)
@@ -111,7 +107,6 @@ void  PeerClass::SetPeriphValue(char *Name, float Value)
         if (strcmp(Name, Periph[P].GetName()) == 0) Periph[P].SetValue(Value); 
     }    
 }
-float PeerClass::GetPeriphValue(int P) { return Periph[P].GetValue(); }
 float PeerClass::GetPeriphValue(char *Name)
 {
    for (int P=0; P<MAX_PERIPHERALS; P++)
@@ -121,7 +116,6 @@ float PeerClass::GetPeriphValue(char *Name)
 
     return -1;
 }
-float PeerClass::GetPeriphNullwert(int P) { return Periph[P].GetNullwert(); }
 float PeerClass::GetPeriphNullwert(char *Name) 
 {
     for (int P=0; P<MAX_PERIPHERALS; P++)
@@ -131,11 +125,181 @@ float PeerClass::GetPeriphNullwert(char *Name)
 
     return -1;
 }
-void  PeerClass::SetPeriphNullwert(int P, float Nullwert) { Periph[P].SetNullwert(Nullwert); }
 void  PeerClass::SetPeriphNullwert(char *Name, float Nullwert)
 {
     for (int P=0; P<MAX_PERIPHERALS; P++)
     {   
         if (strcmp(Name, Periph[P].GetName()) == 0) Periph[P].SetNullwert(Nullwert);
     }    
+}
+PeriphClass *PeerClass::GetPeriphPtr(char *Name)
+{
+    for (int P=0; P<MAX_PERIPHERALS; P++)
+    {
+        if (strcpy(Periph[P].GetName(), Name) == 0) return &Periph[P];
+    }
+    return NULL;
+}
+#pragma endregion PeerClass::Declaration
+
+PeerClass *FindPeerByMAC(uint8_t *BroadcastAddress)
+{
+    PeerClass *Peer;
+    for(int i = 0; i < PeerList.size(); i++){
+
+		Peer = PeerList.get(i);
+
+		if (memcmp(Peer->GetBroadcastAddress(), BroadcastAddress, 6) == 0) return Peer;
+	}
+    return NULL;
+}
+PeerClass *FindPeerById(int Id)
+{
+    PeerClass *Peer;
+    for(int i = 0; i < PeerList.size(); i++){
+
+		Peer = PeerList.get(i);
+
+		if (Peer->GetId() == Id) return Peer;
+    }
+    return NULL;
+}
+PeerClass *FindPeerByName(char *Name)
+{
+    PeerClass *Peer;
+    for(int i = 0; i < PeerList.size(); i++) 
+    {   
+        Peer = PeerList.get(i);
+        if (strcmp(Peer->GetName(), Name) == 0) return Peer;
+    }
+    return NULL;
+}
+PeerClass *FindNextPeer(PeerClass *P, int Type, bool circular)
+// returns next Peer, tries PeerList.size() times, otherwise returns NULL
+{
+    PeerClass *Peer;
+    int ActualPeerIndex;
+
+    //Get PeerIndex in List
+    for(int i = 0; i < PeerList.size(); i++) 
+    {   
+        if (PeerList.get(i) == P) ActualPeerIndex = i;
+    }
+
+    for (int i=0; i<PeerList.size(); i++)
+    {       
+        ActualPeerIndex++;
+        if (ActualPeerIndex = PeerList.size()) 
+        {   
+            if (!circular) return NULL;
+            ActualPeerIndex = 0;
+        }
+
+        Peer = PeerList.get(ActualPeerIndex);
+        
+        if (Type == MODULE_ALL) return Peer;
+        if (Type == Peer->GetType()) return Peer;
+    }
+    return NULL;
+}
+PeerClass *FindPrevPeer(PeerClass *P, int Type, bool circular)
+// returns previous Peer, tries PeerList.size() times, otherwise returns NULL
+{
+    PeerClass *Peer;
+    int ActualPeerIndex;
+
+    //Get PeerIndex in List
+    for(int i = 0; i < PeerList.size(); i++) 
+    {   
+        if (PeerList.get(i) == P) ActualPeerIndex = i;
+    }
+
+    for (int i=0; i<PeerList.size(); i++)
+    {       
+        ActualPeerIndex--;
+        if (ActualPeerIndex == -1) 
+        {   
+            if (!circular) return NULL;
+            ActualPeerIndex = PeerList.size()-1;
+        }
+
+        Peer = PeerList.get(ActualPeerIndex);
+        
+        if (Type == MODULE_ALL) return Peer;
+        if (Type == Peer->GetType()) return Peer;
+    }
+    return NULL;
+}
+
+PeriphClass *FindPeriphById(int Id)
+{
+    for(int i = 0; i < PeriphList.size(); i++) 
+    {   
+        if (PeriphList.get(i)->GetId() == Id) return PeriphList.get(i);
+    }
+    return NULL;
+}
+
+PeriphClass *FindFirstPeriph(PeerClass *P, int Type)
+// returns first Periph of Type, otherwise returns NULL);
+{
+    
+    for (int i=0; i<MAX_PERIPHERALS; i++)
+    {   
+        int PType = P->GetPeriphType(i);
+
+        switch (Type) {
+            case SENS_TYPE_SENS:    if ((PType == SENS_TYPE_VOLT) or (PType == SENS_TYPE_AMP)) return P->GetPeriphPtr(i); break;
+            case SENS_TYPE_VOLT:    if  (PType == SENS_TYPE_VOLT)                              return P->GetPeriphPtr(i); break;
+            case SENS_TYPE_AMP:     if  (PType == SENS_TYPE_AMP)                               return P->GetPeriphPtr(i); break;
+            case SENS_TYPE_SWITCH:  if  (PType == SENS_TYPE_SWITCH)                            return P->GetPeriphPtr(i); break;
+        }
+    }
+    return NULL;
+}
+PeriphClass *FindNextPeriph(PeriphClass *PeriphT, int Type, bool circular)
+// finds next Periph with given Type from Peer, otherwise NULL
+{
+    
+    
+    PeriphClass *Periph;
+    PeerClass *P = FindPeerById(PeriphT->GetPeerId());
+    int PeriphPos = PeriphT->GetPos();
+
+    for (int i=0; i<MAX_PERIPHERALS; i++)
+    {   PeriphPos++;
+
+        if (PeriphPos == MAX_PERIPHERALS)
+        {
+            if (!circular) return NULL;
+            PeriphPos = 0;
+        }
+    
+        Periph = P->GetPeriphPtr(PeriphPos);
+        if  (Type == Periph->GetType()) return Periph;
+        if ((Type == SENS_TYPE_SENS) and (Periph->IsSensor())) return Periph;
+    }
+    return NULL;
+}
+PeriphClass *FindPrevPeriph(PeriphClass *PeriphT, int Type, bool circular)
+// returns previous Periph with give Type from Peer, otherwise NULL
+{
+    PeriphClass *Periph;
+    PeerClass *P = FindPeerById(PeriphT->GetPeerId());
+    int PeriphPos = PeriphT->GetPos();
+
+    for (int i=0; i<MAX_PERIPHERALS; i++)
+    {   PeriphPos--;
+
+        if (PeriphPos == -1)
+        {
+            if (!circular) return NULL;
+            PeriphPos = MAX_PERIPHERALS-1;
+        }
+    
+        Periph = P->GetPeriphPtr(PeriphPos);
+        if  (Type == Periph->GetType()) return Periph;
+        if ((Type == SENS_TYPE_SENS) and (Periph->IsSensor())) return Periph;
+    }
+    return NULL;
 }
