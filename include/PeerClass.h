@@ -8,9 +8,10 @@ class PeriphClass {
     static int  _ClassId;
 
     private:
-        char        _Name[20];
+        char        _Name[50];
         int         _Id;
         int         _Type;      //1=Switch, 2=Amp, 3=Volt
+        int         _Pos;       //Periph 1..4.. from one peer
         bool        _isADS;
         int         _IOPort;
         float       _Nullwert;
@@ -23,7 +24,7 @@ class PeriphClass {
     
     public:
         PeriphClass();
-        void  Setup(char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId);
+        void  Setup(int P, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId);
         
         bool  SetName(char* Name);
         char *GetName();
@@ -124,7 +125,8 @@ class PeerClass
         void  SetPeriphNullwert(int P, float Nullwert);
         void  SetPeriphNullwert(char *Name, float Nullwert);
 
-        int   GetPeriphId(char *Name);        
+        int   GetPeriphId(char *Name);    
+        int   GetPeriphId(int Pos);    
 };
 
 #endif

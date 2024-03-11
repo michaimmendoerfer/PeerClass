@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include "PeerClass.h"
+#include <LinkedList.h>
 
-PeerClass Peer[10];
-PeriphClass Periph;
+LinkedList<PeerClass*> PeerList = LinkedList<PeerClass*>();
+
 
 void PrintMAC(const uint8_t * mac_addr){
   char macStr[18];
@@ -14,22 +15,56 @@ void setup() {
   Serial.begin(115200);
 
   Serial.println("Setup");
+  PeerClass *Peer;
 
   uint8_t BroadcastAddress[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-  Peer[0].Setup("Peer-0", 10, BroadcastAddress, false, true, false, false);
-  Peer[1].Setup("Peer-1", 11, BroadcastAddress, false, true, false, false);
-  Peer[2].Setup("Peer-2", 12, BroadcastAddress, false, true, false, false);
   
-  Peer[0].SetupPeriph(0,"Peer 0 - Periph 0", 1, 1, 23, 3521, 166, 200, Peer[0].GetId());
-  Peer[0].SetupPeriph(1,"Peer 0 - Periph 1", 2, 1, 23, 3521, 166, 200, Peer[0].GetId());
-  Peer[0].SetupPeriph(2,"Peer 0 - Periph 2", 3, 1, 23, 3521, 166, 200, Peer[0].GetId());
-  Peer[0].SetupPeriph(3,"Peer 0 - Periph 3", 4, 1, 23, 3521, 166, 200, Peer[0].GetId());
+  Peer = new PeerClass();
+  Peer->Setup("Peer-0", 10, BroadcastAddress, false, true, false, false);
+	PeerList.add(Peer);
 
+  Peer = new PeerClass();
+  Peer->Setup("Peer-1", 11, BroadcastAddress, false, true, false, false);
+  PeerList.add(Peer);
 
-  Serial.print("Peer[0].Id="); Serial.println(Peer[0].GetId());
-  Serial.print("Peer[0].Name="); Serial.println(Peer[0].GetName());
-  Serial.print("Peer[0].Periph1.Name="); Serial.println(Peer[0].GetPeriphName(1));
-  Serial.print("Peer[0].MAC="); PrintMAC(Peer[0].GetBroadcastAddress());
+  Peer = new PeerClass();
+  Peer->Setup("Peer-2", 12, BroadcastAddress, false, true, false, false);
+  PeerList.add(Peer);
+
+  
+  int current = 0;
+
+  char Buf[50];
+
+	for(int i = 0; i < PeerList.size(); i++){
+
+		// Get animal from list
+		Peer = PeerList.get(i);
+
+		// If its a mammal, then print it's name
+		if(Peer->GetType() == 11){
+
+			// Avoid printing spacer on the first element
+			
+			Serial.print(Peer->GetName());
+      Serial.println(" is Type:11");
+		}
+    sprintf(Buf, "List: %d - Peer-Id %d - Periph-Id - %d", i, Peer->GetId(), Peer->GetPeriphId(0));
+    Peer->SetupPeriph(0, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    sprintf(Buf, "List: %d - Peer-Id %d - Periph-Id - %d", i, Peer->GetId(), Peer->GetPeriphId(1));
+    Peer->SetupPeriph(1, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    sprintf(Buf, "List: %d - Peer-Id %d - Periph-Id - %d", i, Peer->GetId(), Peer->GetPeriphId(2));
+    Peer->SetupPeriph(2, Buf, 10, false, 0, 0, 0, 0, Peer->GetId());
+    }
+
+  for(int i = 0; i < PeerList.size(); i++){
+
+		// Get animal from list
+		Peer = PeerList.get(i);
+
+    Serial.printf("%s:\n%s\n%s\n%s\n", Peer->GetName(), Peer->GetPeriphName(0),Peer->GetPeriphName(1),Peer->GetPeriphName(2));
+		
+	}
 }
 
 void loop() {

@@ -9,10 +9,11 @@ PeriphClass::PeriphClass()
     _Id = _ClassId;
     _ClassId++;
 }
-void  PeriphClass::Setup(char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
+void  PeriphClass::Setup(int P, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
 {
     strcpy(_Name, Name);
     _Type = Type;
+    _Pos = P;
     _isADS = isADS;
     _IOPort = IOPort;
     _Nullwert = Nullwert;
@@ -44,8 +45,6 @@ bool  PeriphClass::hasChanged() { return _Changed; }
 bool  PeriphClass::GetChanged() { return _Changed; }
 void  PeriphClass::SetChanged(bool Changed) { _Changed = Changed; }
 
-
-
 PeerClass::PeerClass()
 {
     _Id = _ClassId;
@@ -70,7 +69,7 @@ void  PeerClass::SetType(int Type) { _Type = Type; }
 uint8_t *PeerClass::GetBroadcastAddress() { return _BroadcastAddress; }
 void     PeerClass::SetBroadcastAddress(int8_t *BroadcastAddress) 
 { 
-    for (int b=0; b<6; b++)_BroadcastAddress[b] = BroadcastAddress[b];
+    memcpy(_BroadcastAddress, BroadcastAddress, 6);
 }
 uint32_t PeerClass::GetTSLastSeen() { return _TSLastSeen; }
 void     PeerClass::SetTSLastSeen(uint32_t TSLastSeen) { _TSLastSeen = TSLastSeen; }
@@ -86,7 +85,7 @@ char *PeerClass::GetPeriphName(int P) { return Periph[P].GetName(); }
 bool  PeerClass::SetPeriphName(int P, char *Name) { Periph[P].SetName(Name); return true; }
 void  PeerClass::SetupPeriph(int P, char* Name, int Type, bool isADS, int IOPort, float Nullwert, float VperAmp, int Vin, int PeerId)
 {
-    Periph[P].Setup(Name, Type, isADS, IOPort, Nullwert, VperAmp, Vin, PeerId);
+    Periph[P].Setup(P, Name, Type, isADS, IOPort, Nullwert, VperAmp, Vin, PeerId);
 }
 
 int   PeerClass::GetPeriphId(char *Name)
@@ -96,6 +95,10 @@ int   PeerClass::GetPeriphId(char *Name)
         if (strcmp(Name, Periph[P].GetName()) == 0) return Periph[P].GetId();
     }
     return -1;
+}
+int   PeerClass::GetPeriphId(int Pos)
+{
+    return Periph[Pos].GetId();
 }
 void  PeerClass::SetPeriphValue(int P, float Value)
 {
@@ -118,7 +121,6 @@ float PeerClass::GetPeriphValue(char *Name)
 
     return -1;
 }
-
 float PeerClass::GetPeriphNullwert(int P) { return Periph[P].GetNullwert(); }
 float PeerClass::GetPeriphNullwert(char *Name) 
 {
