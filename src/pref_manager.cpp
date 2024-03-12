@@ -193,15 +193,14 @@ void ReportAll()
     for(int i = 0; i < PeerList.size(); i++){
       P = PeerList.get(i);
       Serial.printf("[%d] %s, Type:%d\n", P->GetId(), P->GetName(), P->GetType());
-      
-    }
-  
-    Serial.println("jetzt kommt Multi");
 
-    for (int s=0; s<MULTI_SCREENS; s++) {
-      snprintf(Buf, sizeof(Buf), "Screen-%d", s);
-      preferences.putString(Buf, Screen[s].Export());
-      Serial.printf("schreibe: [%s]: %s\n", Buf, Screen[s].Export());
+      for (int Si=0; i<MAX_PERIPHERALS; i++)
+        Serial.printf("    %d: %s(%d) at position %d\n", P->GetPeriphId(Si), P->GetPeriphName(Si), P->GetPeriphType(Si), P->GetPeriphPos(Si));
+  
+      for (int s=0; s<MULTI_SCREENS; s++) {
+        Serial.printf("Screen[%d]: %s", s, Screen[s].GetName());
+        for (int Si=0; Si<PERIPH_PER_SCREEN; Si++)
+          Serial.printf("    %d: %s(%d) at position %d\n", Screen[s].Periph[Si]->GetId(), Screen[s].Periph[Si]->GetName(), Screen[s].Periph[Si]->GetType(), Si);
+      }
     }
-    preferences.end();
 }
