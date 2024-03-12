@@ -68,7 +68,6 @@ void SavePeers()
     }
     preferences.end();
 }
-
 void GetPeers() 
 {
     PeerClass *P;
@@ -106,7 +105,6 @@ void GetPeers()
     }
     preferences.end();
 }
-
 void ClearPeers() {
   preferences.begin("JeepifyPeers", false);
     preferences.clear();
@@ -153,7 +151,6 @@ void DeletePeer(PeerClass *P)
         }
     }
 }
-
 void RegisterPeers() 
 {
   PeerClass *P;
@@ -187,4 +184,24 @@ void RegisterPeers()
           Serial.print (" ("); PrintMAC(peerInfo.peer_addr); Serial.println(") added...");
       }
   }
+}
+
+void ReportAll()
+{
+    PeerClass *P;
+    
+    for(int i = 0; i < PeerList.size(); i++){
+      P = PeerList.get(i);
+      Serial.printf("[%d] %s, Type:%d\n", P->GetId(), P->GetName(), P->GetType());
+      
+    }
+  
+    Serial.println("jetzt kommt Multi");
+
+    for (int s=0; s<MULTI_SCREENS; s++) {
+      snprintf(Buf, sizeof(Buf), "Screen-%d", s);
+      preferences.putString(Buf, Screen[s].Export());
+      Serial.printf("schreibe: [%s]: %s\n", Buf, Screen[s].Export());
+    }
+    preferences.end();
 }
