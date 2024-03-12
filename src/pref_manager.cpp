@@ -78,7 +78,7 @@ void GetPeers()
     preferences.begin("JeepifyPeers", true);
 
     PeerList.clear();
-    
+
 
     int PeerCount = preferences.getInt("PeerCount");
     
@@ -91,8 +91,9 @@ void GetPeers()
 
         P = new PeerClass();
         P->Import(ScreenExportImportBuffer);
+        
         PeerList.add(P);
-        for (int Si=0; Si<MAX_PERIPHERALS; Si++) PeriphList.add()
+        for (int Si=0; Si<MAX_PERIPHERALS; Si++) PeriphList.add(P->GetPeriphPtr(Si));
     }
   
     Serial.println("jetzt kommt Multi");
@@ -118,26 +119,37 @@ void ClearInit() {
     Serial.println("JeepifyInit cleared...");
   preferences.end();
 }
-void DeletePeer(struct_Peer *Peer) {
-  for (int PNr=0; PNr<MAX_PEERS; PNr++) {
-    if (P[PNr].Id == Peer->Id) {
-      P[PNr].Name[0] = '\0';
-      P[PNr].Id = 0;
-      P[PNr].Type = 0;
-      for (int i; i<6; i++) P[PNr].BroadcastAddress[i] = 0;
-      P[PNr].TSLastSeen = 0;
-      P[PNr].SleepMode = false;
-      P[PNr].DebugMode = false;
-    }
-  }
-  
-  for (int s=0; s<MULTI_SCREENS; s++) {
-    for (int p=0; p<PERIPH_PER_SCREEN; p++) {
-      if (Screen[s].PeerId[p] == Peer->Id) {
-        Screen[s].PeerId[p] = 0;
-        Screen[s].PeriphId[p] = 0;
-        Screen[s].Periph[p] = NULL;
+void DeletePeer(PeerClass *P) 
+{
+    PeriphClass *Periph;
+    
+    for (int s=0; s<MULTI_SCREENS; s++) {
+      for (int Si=0; Si<PERIPH_PER_SCREEN; Si++)
+      {
+          if (Screen[s].GetPeerId(Si) == P->GetId())
+          {
+              Screen[s].SetPeerId(Si, -1);
+              Screen[s].SetPeer(Si, NULL);
+              Screen[s].SetPeriphId(Si, -1);
+              Screen[s].SetPeer(Si, NULL);
+              Screen[s].SetChanged(true);
+          }
       }
-    } 
-  }
+    }
+    
+    for (int Si=PeriphList.size()-1; Si>=0; Si--)
+    {
+        Periph = PeriphList.get(Si);
+        if (Periph.GetPeerId() == P->GetId()) PeriphList.remove(Si);
+    }
+
+    for(int i = 0; i < PeerList.size(); i++){
+        if (PeerList.get(i) == P) 
+        {
+            PeerList.remove(i);
+            sprintf(Buf, "Peer: %s deleted and removed from list.", P->GetName());
+            delete P;
+            P = NULL;
+        }
+    }
 }

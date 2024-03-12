@@ -11,8 +11,6 @@
 
 void   PrintMAC(const uint8_t * mac_addr);
 
-void   PrintMAC(const uint8_t * mac_addr);
-
 extern LinkedList<PeerClass*>   PeerList;
 extern LinkedList<PeriphClass*> PeriphList;
 
