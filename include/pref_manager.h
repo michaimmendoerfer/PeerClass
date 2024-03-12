@@ -17,10 +17,10 @@ class MultiMonitorClass {
         bool         _Used;
     
     public:
-        MultiMonitorClass();
+        MultiMonitorClass() { strcpy(_Name, ""); };
         char *Export();
         void  Import(char *Buf);
-        
+
         bool  SetName(char* Name) { strcpy(_Name, Name); return true; }
         char *GetName(){ return (_Name); }
         int   GetId() { return _Id; }
@@ -53,6 +53,7 @@ class MultiMonitorClass {
 void   SavePeers();
 void   GetPeers();
 void   DeletePeer(PeerClass *P);
+void   ReportAll();
 void   RegisterPeers();
 void   ClearPeers();
 void   ClearInit();

@@ -5,8 +5,8 @@
 PeerClass   *ActivePeer, *ActivePDC, *ActiveBat, *ActiveSelection;
 PeriphClass *ActiveSens, *ActiveSwitch, *ActivePeriph;
 
-int  PeriphClass::_ClassId = 0;
-int  PeerClass::_ClassId = 0;
+int  PeriphClass::_ClassId = 1;
+int  PeerClass::_ClassId = 1;
 
 char ExportImportBuffer[50+40*MAX_PERIPHERALS];
 
@@ -198,7 +198,7 @@ PeerClass *FindNextPeer(PeerClass *P, int Type, bool circular)
     for (int i=0; i<PeerList.size(); i++)
     {       
         ActualPeerIndex++;
-        if (ActualPeerIndex = PeerList.size()) 
+        if (ActualPeerIndex == PeerList.size()) 
         {   
             if (!circular) return NULL;
             ActualPeerIndex = 0;

@@ -17,11 +17,13 @@ char ScreenExportImportBuffer[30*MULTI_SCREENS];
 char* MultiMonitorClass::Export() 
 // fills ScreenExportImportBuffer with "Name;PeriphId0;PeriphId1;PeriphId2;PeriphId3"
 {
+    char ReturnBufferScreen[50];
+
     strcpy(ScreenExportImportBuffer, _Name);
                         
     for (int Si=0; Si<PERIPH_PER_SCREEN; Si++)
     {   
-        strcat(ReturnBufferScreen, ";%d",_PeriphId[Si]);
+        sprintf(ReturnBufferScreen, ";%d",_PeriphId[Si]);
         strcat(ScreenExportImportBuffer, ReturnBufferScreen);
     }
 
@@ -46,7 +48,7 @@ void SavePeers()
 {
     PeerClass *P;
     char Buf[10];
-    char ExportBuffer[]
+    char ExportBuffer[50];
     
     preferences.begin("JeepifyPeers", true);
     
@@ -56,7 +58,8 @@ void SavePeers()
       P = PeerList.get(i);
       sprintf(Buf, "Peer-%d", i);
       preferences.putString(Buf, P->Export());
-      Serial.printf("schreibe: [%s]: %s\n", Buf, P->Export());
+      Serial.printf("schreibe: [%s]: %s", Buf, P->Export());
+      Serial.println();
     }
   
     Serial.println("jetzt kommt Multi");
@@ -64,7 +67,8 @@ void SavePeers()
     for (int s=0; s<MULTI_SCREENS; s++) {
       snprintf(Buf, sizeof(Buf), "Screen-%d", s);
       preferences.putString(Buf, Screen[s].Export());
-      Serial.printf("schreibe: [%s]: %s\n", Buf, Screen[s].Export());
+      Serial.printf("schreibe: [%s]: %s", Buf, Screen[s].Export());
+      Serial.println();
     }
     preferences.end();
 }
@@ -85,7 +89,7 @@ void GetPeers()
     {
         sprintf(Buf, "Peer-%d", Pi);
         Buffer = preferences.getString(Buf, "");
-        strcpy(ScreenExportImportBuffer = Buffer.c_str());
+        strcpy(ScreenExportImportBuffer, Buffer.c_str());
         Serial.printf("gelesen: [%s]: %s\n", Buf, ScreenExportImportBuffer);
 
         P = new PeerClass();
@@ -99,8 +103,9 @@ void GetPeers()
 
     for (int s=0; s<MULTI_SCREENS; s++) {
       snprintf(Buf, sizeof(Buf), "Screen-%d", s);
-      ScreenExportImportBuffer = preferences.getString(Buf, "");
-
+      Buffer = preferences.getString(Buf, "");
+      strcpy(ScreenExportImportBuffer, Buffer.c_str());
+        
       Screen[s].Import(ScreenExportImportBuffer);
     }
     preferences.end();
@@ -138,14 +143,14 @@ void DeletePeer(PeerClass *P)
     for (int Si=PeriphList.size()-1; Si>=0; Si--)
     {
         Periph = PeriphList.get(Si);
-        if (Periph.GetPeerId() == P->GetId()) PeriphList.remove(Si);
+        if (Periph->GetPeerId() == P->GetId()) PeriphList.remove(Si);
     }
 
     for(int i = 0; i < PeerList.size(); i++){
         if (PeerList.get(i) == P) 
         {
             PeerList.remove(i);
-            sprintf(Buf, "Peer: %s deleted and removed from list.", P->GetName());
+            Serial.printf("Peer: %s deleted and removed from list.", P->GetName());
             delete P;
             P = NULL;
         }
@@ -170,7 +175,7 @@ void RegisterPeers()
     }
 
   // Register Peers
-  for (int i=0; i<Peerlist.size(); i++) 
+  for (int i=0; i<PeerList.size(); i++) 
   {
       P = PeerList.get(i);
       memcpy(peerInfo.peer_addr, P->GetBroadcastAddress(), 6);
@@ -180,7 +185,7 @@ void RegisterPeers()
           PrintMAC(peerInfo.peer_addr); Serial.println(": Failed to add peer");
       }
       else {
-          Serial.print("Peer: "); Serial.print(P[PNr].Name); 
+          Serial.print("Peer: "); Serial.print(P->GetName()); 
           Serial.print (" ("); PrintMAC(peerInfo.peer_addr); Serial.println(") added...");
       }
   }
@@ -190,17 +195,30 @@ void ReportAll()
 {
     PeerClass *P;
     
-    for(int i = 0; i < PeerList.size(); i++){
+    for(int i=0; i < PeerList.size(); i++)
+    {
       P = PeerList.get(i);
-      Serial.printf("[%d] %s, Type:%d\n", P->GetId(), P->GetName(), P->GetType());
+      Serial.printf("[%d] %s, Type:%d", P->GetId(), P->GetName(), P->GetType());
+      Serial.println();
+      for (int Si=0; Si<MAX_PERIPHERALS; Si++)
+      {
+          if (P->GetPeriphType(Si) > 0)
+          {
+              Serial.printf("    %d: %s(%d) at position %d", P->GetPeriphId(Si), P->GetPeriphName(Si), P->GetPeriphType(Si), P->GetPeriphPos(Si));
+              Serial.println();
+          }
+      }
 
-      for (int Si=0; i<MAX_PERIPHERALS; i++)
-        Serial.printf("    %d: %s(%d) at position %d\n", P->GetPeriphId(Si), P->GetPeriphName(Si), P->GetPeriphType(Si), P->GetPeriphPos(Si));
-  
       for (int s=0; s<MULTI_SCREENS; s++) {
-        Serial.printf("Screen[%d]: %s", s, Screen[s].GetName());
-        for (int Si=0; Si<PERIPH_PER_SCREEN; Si++)
-          Serial.printf("    %d: %s(%d) at position %d\n", Screen[s].Periph[Si]->GetId(), Screen[s].Periph[Si]->GetName(), Screen[s].Periph[Si]->GetType(), Si);
+          //Serial.printf("Screen[%d]: %s", s, Screen[s].GetName());
+          for (int Si=0; Si<PERIPH_PER_SCREEN; Si++)
+          {
+              if (Screen[s].GetPeriphId(Si))
+              {
+                Serial.printf("    %d: %s(%d) at position %d", Screen[s].GetPeriph(Si)->GetId(), Screen[s].GetPeriph(Si)->GetName(), Screen[s].GetPeriph(Si)->GetType(), Si);
+                Serial.println();
+              }
+          }
       }
     }
 }
