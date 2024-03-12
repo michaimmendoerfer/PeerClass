@@ -51,13 +51,11 @@ void setup() {
     PeriphList.add(Peer->GetPeriphPtr(2));
     }
 
-  for(int i = 0; i < PeerList.size(); i++){
-
-		// Get animal from list
+  for(int i = 0; i < PeerList.size(); i++)
+  {
 		Peer = PeerList.get(i);
 
-    Serial.printf("%s:\n%s\n%s\n%s\n", Peer->GetName(), Peer->GetPeriphName(0),Peer->GetPeriphName(1),Peer->GetPeriphName(2));
-		
+    Serial.printf("%s:\n   %s, %s, %s, %s\n", Peer->GetName(), Peer->GetPeriphName(0),Peer->GetPeriphName(1),Peer->GetPeriphName(2),Peer->GetPeriphName(3));
 	}
 }
 

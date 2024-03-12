@@ -52,11 +52,11 @@ class MultiMonitorClass {
 
 void   SavePeers();
 void   GetPeers();
+void   DeletePeer(PeerClass *P);
 void   RegisterPeers();
 void   ClearPeers();
 void   ClearInit();
 void   ReportAll();
-int    GetPeerCount();
 void   ReportScreen(int s);
 
 extern Preferences preferences;

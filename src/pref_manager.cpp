@@ -136,7 +136,7 @@ void DeletePeer(PeerClass *P)
           }
       }
     }
-    
+
     for (int Si=PeriphList.size()-1; Si>=0; Si--)
     {
         Periph = PeriphList.get(Si);
@@ -152,4 +152,39 @@ void DeletePeer(PeerClass *P)
             P = NULL;
         }
     }
+}
+
+void RegisterPeers() 
+{
+  PeerClass *P;
+
+  esp_now_peer_info_t peerInfo;
+  peerInfo.channel = 1;
+  peerInfo.encrypt = false;
+  memset(&peerInfo, 0, sizeof(peerInfo));
+
+  // Register BROADCAST
+  for (int b=0; b<6; b++) peerInfo.peer_addr[b] = 0xff;
+    if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+      PrintMAC(peerInfo.peer_addr); Serial.println(": Failed to add peer");
+    }
+    else {
+      Serial.print (" ("); PrintMAC(peerInfo.peer_addr);  Serial.println(") added...");
+    }
+
+  // Register Peers
+  for (int i=0; i<Peerlist.size(); i++) 
+  {
+      P = PeerList.get(i);
+      memcpy(peerInfo.peer_addr, P->GetBroadcastAddress(), 6);
+
+      if (esp_now_add_peer(&peerInfo) != ESP_OK) 
+      {
+          PrintMAC(peerInfo.peer_addr); Serial.println(": Failed to add peer");
+      }
+      else {
+          Serial.print("Peer: "); Serial.print(P[PNr].Name); 
+          Serial.print (" ("); PrintMAC(peerInfo.peer_addr); Serial.println(") added...");
+      }
+  }
 }
