@@ -241,7 +241,7 @@ PeriphClass *FindPeriphById(int Id)
 }
 
 PeriphClass *FindFirstPeriph(PeerClass *P, int Type)
-// returns first Periph of Type, otherwise returns NULL);
+// returns first Periph of Type, otherwise returns NULL;
 {
     
     for (int i=0; i<MAX_PERIPHERALS; i++)

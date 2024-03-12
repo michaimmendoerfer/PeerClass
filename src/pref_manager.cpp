@@ -15,20 +15,20 @@ MultiMonitorClass Screen[MULTI_SCREENS];
 char ScreenExportImportBuffer[30*MULTI_SCREENS];
 
 char* MultiMonitorClass::Export() 
+// fills ScreenExportImportBuffer with "Name;PeriphId0;PeriphId1;PeriphId2;PeriphId3"
 {
-    char ReturnBufferScreen[40];
-
     strcpy(ScreenExportImportBuffer, _Name);
                         
     for (int Si=0; Si<PERIPH_PER_SCREEN; Si++)
     {   
-        sprintf(ReturnBufferScreen, "%d;",_PeriphId[Si]);
+        strcat(ReturnBufferScreen, ";%d",_PeriphId[Si]);
         strcat(ScreenExportImportBuffer, ReturnBufferScreen);
     }
 
     return ScreenExportImportBuffer;
 }
 void MultiMonitorClass::Import(char *Buf) 
+// import from Buf with "Name;PeriphId0;PeriphId1;PeriphId2;PeriphId3"
 {
     strcpy(_Name, strtok(Buf, ";"));
     
@@ -62,8 +62,7 @@ void SavePeers()
 
     for (int s=0; s<MULTI_SCREENS; s++) {
       snprintf(Buf, sizeof(Buf), "Screen-%d", s);
-      strcpy(ScreenExportImportBuffer, Screen[s].Export();
-      preferences.putString(Buf, ScreenExportImportBuffer);
+      preferences.putString(Buf, Screen[s].Export());
     }
     preferences.end();
 }
