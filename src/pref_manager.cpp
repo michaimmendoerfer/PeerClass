@@ -54,7 +54,7 @@ void SavePeers()
     for(int i = 0; i < PeerList.size(); i++){
       P = PeerList.get(i);
       sprintf(Buf, "Peer-%d", i);
-      preferences.putBytes(Buf, P->Export(), strlen(P->Export()));
+      preferences.putString(Buf, P->Export());
       Serial.printf("schreibe: [%s]: %s\n", Buf, P->Export());
     }
   
@@ -63,6 +63,7 @@ void SavePeers()
     for (int s=0; s<MULTI_SCREENS; s++) {
       snprintf(Buf, sizeof(Buf), "Screen-%d", s);
       preferences.putString(Buf, Screen[s].Export());
+      Serial.printf("schreibe: [%s]: %s\n", Buf, Screen[s].Export());
     }
     preferences.end();
 }
