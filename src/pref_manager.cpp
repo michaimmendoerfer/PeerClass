@@ -42,6 +42,7 @@ void MultiMonitorClass::Import(char *Buf)
 
 }
 void SavePeers() 
+// writes [Peer-0] - [Name;Type;BroadcastAddress[0-5];SleepMode;DebugMode;DemoMode;Periph0Name;Periph0Type;Periph0Pos;Periph0PeerId...]
 {
     PeerClass *P;
     char Buf[10];
@@ -72,16 +73,26 @@ void GetPeers()
 {
     PeerClass *P;
     char Buf[10];
-    
+    String Buffer;
+
     preferences.begin("JeepifyPeers", true);
+
+    PeerList.clear();
+    
 
     int PeerCount = preferences.getInt("PeerCount");
     
-    for (int P=0 ; P<PeerCount; P++)
+    for (int Pi=0 ; Pi<PeerCount; Pi++)
     {
-        sprintf(Buf, "Peer-%d", i);
-        ScreenExportImportBuffer = preferences.getString(Buf, "");
-        Serial.printf("schreibe: [%s]: %s\n", Buf, P->Export());
+        sprintf(Buf, "Peer-%d", Pi);
+        Buffer = preferences.getString(Buf, "");
+        strcpy(ScreenExportImportBuffer = Buffer.c_str());
+        Serial.printf("gelesen: [%s]: %s\n", Buf, ScreenExportImportBuffer);
+
+        P = new PeerClass();
+        P->Import(ScreenExportImportBuffer);
+        PeerList.add(P);
+        for (int Si=0; Si<MAX_PERIPHERALS; Si++) PeriphList.add()
     }
   
     Serial.println("jetzt kommt Multi");
