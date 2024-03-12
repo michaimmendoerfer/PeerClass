@@ -174,6 +174,15 @@ PeerClass *FindPeerByName(char *Name)
     }
     return NULL;
 }
+PeerClass *FindFirstPeer(int Type)
+// returns first Peer with Type, otherwise NULL
+{
+    for(int i = 0; i < PeerList.size(); i++) 
+    {   
+        if ((PeerList.get(i)->GetType() == Type) or (Type == MODULE_ALL)) return PeerList.get(i);
+    }
+    return NULL;
+}
 PeerClass *FindNextPeer(PeerClass *P, int Type, bool circular)
 // returns next Peer, tries PeerList.size() times, otherwise returns NULL
 {
